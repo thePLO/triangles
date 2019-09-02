@@ -1,0 +1,92 @@
+<style>* {padding: 0; margin: 0}
+	body{height:700px;}
+</style>
+<body onresize="resize();">
+	<canvas id="c" /></canvas>
+	<br><div id="costatsTriangle"></div>
+</body>
+<script type="text/javascript">
+var Vector2 = function(_x,_y){
+	this.x = _x;
+	this.y = _y;
+	
+	this.mag = function(){
+		const len = Math.sqrt((this.x * this.x) + (this.y * this.y));
+		return len;
+	}
+	
+	this.normalized = function(){
+		const length = this.mag();
+		const norm = {
+			x: this.x/length,
+			y: this.y/length
+		}
+		return norm;
+	}
+}
+
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+var fps = 60;
+var center = {x:0, y:0};
+
+function resize(){
+	canvas.width = 250;
+	canvas.height = 250;
+	center.x = canvas.width/2;
+	center.y = canvas.height/2;
+} resize();
+
+var maxSumTri = 0;
+var maxTriangle = {a:{x:0, y:1}, b:{x:0, y:1}, c:{x:0, y:-1}}
+
+var gameLoop = function(){
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	ctx.beginPath();
+	ctx.arc(center.x, center.y, 100, 0, 2 * Math.PI);
+	ctx.closePath();
+	ctx.strokeStyle = "black";
+	ctx.stroke();
+	
+	var triangle = {a:{x:0, y:1}, b:{x:0, y:0}, c:{x:0, y:0}}
+	var angle = Math.random()*Math.PI*2;
+	triangle.b.x = Math.cos(angle);
+	triangle.b.y = Math.sin(angle);
+	angle = Math.random()*Math.PI*2;
+	triangle.c.x = Math.cos(angle);
+	triangle.c.y = Math.sin(angle);
+	
+	ctx.beginPath();
+	ctx.moveTo(center.x+triangle.a.x*100, center.y+triangle.a.y*100);
+	ctx.lineTo(center.x+triangle.b.x*100, center.y+triangle.b.y*100);
+	ctx.lineTo(center.x+triangle.c.x*100, center.y+triangle.c.y*100);
+	ctx.closePath();
+	ctx.strokeStyle = "red";
+	ctx.stroke();
+	
+	var a = new Vector2(triangle.b.x-triangle.a.x, triangle.b.y-triangle.a.y);
+	var b = new Vector2(triangle.c.x-triangle.b.x, triangle.c.y-triangle.b.y);
+	var c = new Vector2(triangle.a.x-triangle.c.x, triangle.a.y-triangle.c.y);
+	var sumTri = a.mag()*a.mag() + b.mag()*b.mag() + c.mag()*c.mag();
+	
+	if(sumTri >= maxSumTri){
+		maxSumTri = sumTri;
+		maxTriangle.a.x = triangle.a.x; maxTriangle.a.y = triangle.a.y;
+		maxTriangle.b.x = triangle.b.x; maxTriangle.b.y = triangle.b.y;
+		maxTriangle.c.x = triangle.c.x; maxTriangle.c.y = triangle.c.y;
+		document.getElementById('costatsTriangle').innerHTML = "a="+a.mag()+", b="+b.mag()+", c="+c.mag()+"<br>Sum(Sqr)="+sumTri;
+	}
+	
+	ctx.beginPath();
+	ctx.moveTo(center.x+maxTriangle.a.x*100, center.y+maxTriangle.a.y*100);
+	ctx.lineTo(center.x+maxTriangle.b.x*100, center.y+maxTriangle.b.y*100);
+	ctx.lineTo(center.x+maxTriangle.c.x*100, center.y+maxTriangle.c.y*100);
+	ctx.closePath();
+	ctx.strokeStyle = "green";
+	ctx.stroke();
+	
+	
+	
+}; setInterval(gameLoop, 1000/fps);
+
+</script>
